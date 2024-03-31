@@ -106,7 +106,7 @@ extension TypesFileTranslator {
                 named: typeName,
                 userDescription: overrides.userDescription ?? schema.description,
                 to: builtinType.withOptional(
-                    overrides.isOptional ?? typeMatcher.isOptional(schema, components: components)
+                    overrides.isOptional ?? (!typeMatcher.isNull(schema) && typeMatcher.isOptional(schema, components: components))
                 )
             )
             return [typealiasDecl]
@@ -153,29 +153,26 @@ extension TypesFileTranslator {
                 arrayContext: arrayContext
             )
         case let .all(of: schemas, core: coreContext):
-            let allOfDecl = try translateAllOrAnyOf(
+            return try translateAllOrAnyOf(
                 typeName: typeName,
                 openAPIDescription: overrides.userDescription ?? coreContext.description,
                 type: .allOf,
                 schemas: schemas
             )
-            return [allOfDecl]
         case let .any(of: schemas, core: coreContext):
-            let anyOfDecl = try translateAllOrAnyOf(
+            return try translateAllOrAnyOf(
                 typeName: typeName,
                 openAPIDescription: overrides.userDescription ?? coreContext.description,
                 type: .anyOf,
                 schemas: schemas
             )
-            return [anyOfDecl]
         case let .one(of: schemas, core: coreContext):
-            let oneOfDecl = try translateOneOf(
+            return try translateOneOf(
                 typeName: typeName,
                 openAPIDescription: overrides.userDescription ?? coreContext.description,
                 discriminator: coreContext.discriminator,
                 schemas: schemas
             )
-            return [oneOfDecl]
         default: return []
         }
     }
