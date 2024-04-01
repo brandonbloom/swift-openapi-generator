@@ -431,9 +431,9 @@ components:
       type: object
       properties:
         foo:
-          type: [array, null]
+          type: [array, 'null']
           items:
-            type: [string, null]
+            type: [string, 'null']
     # To catch the clashes of members and the decoding container.
     TypedAdditionalPropertiesWithPropertyNamedContainer:
       type: object

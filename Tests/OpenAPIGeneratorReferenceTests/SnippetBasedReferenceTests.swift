@@ -302,7 +302,7 @@ final class SnippetBasedReferenceTests: XCTestCase {
               StringArrayNullableItems:
                 type: array
                 items:
-                  type: [string, null]
+                  type: [string, 'null']
             """,
             """
             public enum Schemas {
@@ -323,7 +323,7 @@ final class SnippetBasedReferenceTests: XCTestCase {
                 items:
                   $ref: '#/components/schemas/NullableString'
               NullableString:
-                type: [string, null]
+                type: [string, 'null']
             """,
             """
             public enum Schemas {
@@ -365,9 +365,9 @@ final class SnippetBasedReferenceTests: XCTestCase {
                   fooRequired:
                     type: string
                   fooOptionalNullable:
-                    type: [string, null]
+                    type: [string, 'null']
                   fooRequiredNullable:
-                    type: [string, null]
+                    type: [string, 'null']
 
                   fooOptionalArray:
                     type: array
@@ -378,30 +378,30 @@ final class SnippetBasedReferenceTests: XCTestCase {
                     items:
                       type: string
                   fooOptionalNullableArray:
-                    type: [array, null]
+                    type: [array, 'null']
                     items:
                       type: string
                   fooRequiredNullableArray:
-                    type: [array, null]
+                    type: [array, 'null']
                     items:
                       type: string
 
                   fooOptionalArrayOfNullableItems:
                     type: array
                     items:
-                      type: [string, null]
+                      type: [string, 'null']
                   fooRequiredArrayOfNullableItems:
                     type: array
                     items:
-                      type: [string, null]
+                      type: [string, 'null']
                   fooOptionalNullableArrayOfNullableItems:
-                    type: [array, null]
+                    type: [array, 'null']
                     items:
-                      type: [string, null]
+                      type: [string, 'null']
                   fooRequiredNullableArrayOfNullableItems:
-                    type: [array, null]
+                    type: [array, 'null']
                     items:
-                      type: [string, null]
+                      type: [string, 'null']
                 required:
                   - fooRequired
                   - fooRequiredNullable
@@ -646,7 +646,7 @@ final class SnippetBasedReferenceTests: XCTestCase {
               MyRequiredString:
                 type: string
               MyNullableString:
-                type: [string, null]
+                type: [string, 'null']
               MyObject:
                 type: object
                 properties:
@@ -3038,7 +3038,7 @@ final class SnippetBasedReferenceTests: XCTestCase {
                   content:
                     application/json:
                       schema:
-                        type: [string, null]
+                        type: [string, 'null']
                 responses:
                   default:
                     description: Response
@@ -3194,7 +3194,7 @@ final class SnippetBasedReferenceTests: XCTestCase {
                   content:
                     application/json:
                       schema:
-                        type: [string, null]
+                        type: [string, 'null']
                 responses:
                   default:
                     description: Response
