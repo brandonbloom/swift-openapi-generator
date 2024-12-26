@@ -19,15 +19,8 @@ import PackageDescription
 var swiftSettings: [SwiftSetting] = [
     // https://github.com/apple/swift-evolution/blob/main/proposals/0335-existential-any.md
     // Require `any` for existential types.
-    .enableUpcomingFeature("ExistentialAny")
+    .enableUpcomingFeature("ExistentialAny"), .enableExperimentalFeature("StrictConcurrency=complete"),
 ]
-
-// Strict concurrency is enabled in CI; use this environment variable to enable it locally.
-if ProcessInfo.processInfo.environment["SWIFT_OPENAPI_STRICT_CONCURRENCY"].flatMap(Bool.init) ?? false {
-    swiftSettings.append(contentsOf: [
-        .define("SWIFT_OPENAPI_STRICT_CONCURRENCY"), .enableExperimentalFeature("StrictConcurrency"),
-    ])
-}
 
 let package = Package(
     name: "swift-openapi-generator",
@@ -49,9 +42,10 @@ let package = Package(
 
         // General algorithms
         .package(url: "https://github.com/apple/swift-algorithms", from: "1.2.0"),
+        .package(url: "https://github.com/apple/swift-collections", from: "1.1.4"),
 
         // Read OpenAPI documents
-        .package(url: "https://github.com/mattpolzin/OpenAPIKit", from: "3.1.2"),
+        .package(url: "https://github.com/mattpolzin/OpenAPIKit", from: "3.3.0"),
         .package(url: "https://github.com/jpsim/Yams", "5.1.0"..<"6.0.0"),
 
         // CLI Tool
@@ -62,9 +56,6 @@ let package = Package(
         // code.
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.3.2"),
         .package(url: "https://github.com/apple/swift-http-types", from: "1.0.2"),
-
-        // Build and preview docs
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
     ],
     targets: [
 
@@ -75,7 +66,9 @@ let package = Package(
                 .product(name: "OpenAPIKit", package: "OpenAPIKit"),
                 .product(name: "OpenAPIKit30", package: "OpenAPIKit"),
                 .product(name: "OpenAPIKitCompat", package: "OpenAPIKit"),
-                .product(name: "Algorithms", package: "swift-algorithms"), .product(name: "Yams", package: "Yams"),
+                .product(name: "Algorithms", package: "swift-algorithms"),
+                .product(name: "OrderedCollections", package: "swift-collections"),
+                .product(name: "Yams", package: "Yams"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -114,6 +107,16 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
 
+        // Test Target for swift-openapi-generator
+        .testTarget(
+            name: "OpenAPIGeneratorTests",
+            dependencies: [
+                "swift-openapi-generator", .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+            resources: [.copy("Resources")],
+            swiftSettings: swiftSettings
+        ),
+
         // Generator CLI
         .executableTarget(
             name: "swift-openapi-generator",
@@ -144,3 +147,14 @@ let package = Package(
         ),
     ]
 )
+
+// ---    STANDARD CROSS-REPO SETTINGS DO NOT EDIT   --- //
+for target in package.targets {
+    if target.type != .plugin {
+        var settings = target.swiftSettings ?? []
+        // https://github.com/swiftlang/swift-evolution/blob/main/proposals/0444-member-import-visibility.md
+        settings.append(.enableUpcomingFeature("MemberImportVisibility"))
+        target.swiftSettings = settings
+    }
+}
+// --- END: STANDARD CROSS-REPO SETTINGS DO NOT EDIT --- //

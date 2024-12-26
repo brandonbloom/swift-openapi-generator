@@ -120,7 +120,7 @@ extension FileTranslator {
         }
         var parts: [MultipartSchemaTypedContent] = try topLevelObject.properties.compactMap {
             (key, value) -> MultipartSchemaTypedContent? in
-            let swiftSafeName = swiftSafeName(for: key)
+            let swiftSafeName = context.safeNameGenerator.swiftTypeName(for: key)
             let typeName = typeName.appending(
                 swiftComponent: swiftSafeName + Constants.Global.inlineTypeSuffix,
                 jsonComponent: key
@@ -148,14 +148,6 @@ extension FileTranslator {
         case .disallowed: break
         case .allowed: parts.append(.undocumented)
         case .typed(let schema):
-            let typeUsage = try typeAssigner.typeUsage(
-                usingNamingHint: Constants.AdditionalProperties.variableName,
-                withSchema: .b(schema),
-                components: components,
-                inParent: typeName
-            )!
-            // The unwrap is safe, the method only returns nil when the input schema is nil.
-            let typeName = typeUsage.typeName
             guard
                 let (info, resolvedSchema) = try parseMultipartPartInfo(
                     schema: schema,
@@ -167,7 +159,15 @@ extension FileTranslator {
                     message: "Failed to parse multipart info for additionalProperties in \(typeName.description)."
                 )
             }
-            parts.append(.otherDynamicallyNamed(.init(typeName: typeName, partInfo: info, schema: resolvedSchema)))
+            let partTypeUsage = try typeAssigner.typeUsage(
+                usingNamingHint: Constants.AdditionalProperties.variableName,
+                withSchema: .b(resolvedSchema),
+                components: components,
+                inParent: typeName
+            )!
+            // The unwrap is safe, the method only returns nil when the input schema is nil.
+            let partTypeName = partTypeUsage.typeName
+            parts.append(.otherDynamicallyNamed(.init(typeName: partTypeName, partInfo: info, schema: resolvedSchema)))
         case .any: parts.append(.otherRaw)
         }
         let requirements = try parseMultipartRequirements(
@@ -305,14 +305,14 @@ extension FileTranslator {
             return nil
         }
         let finalContentTypeSource: MultipartPartInfo.ContentTypeSource
-        if let encoding, let contentType = encoding.contentType {
+        if let encoding, let contentType = encoding.contentTypes.first, encoding.contentTypes.count == 1 {
             finalContentTypeSource = try .explicit(contentType.asGeneratorContentType)
         } else {
             finalContentTypeSource = candidateSource
         }
         let contentType = finalContentTypeSource.contentType
         if finalContentTypeSource.contentType.isMultipart {
-            diagnostics.emitUnsupported("Multipart part cannot nest another multipart content.", foundIn: foundIn)
+            try diagnostics.emitUnsupported("Multipart part cannot nest another multipart content.", foundIn: foundIn)
             return nil
         }
         let info = MultipartPartInfo(repetition: repetitionKind, contentTypeSource: finalContentTypeSource)
