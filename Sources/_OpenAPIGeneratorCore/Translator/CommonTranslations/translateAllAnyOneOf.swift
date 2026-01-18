@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 import OpenAPIKit
+import Algorithms
 
 /// Describes one of the two options: allOf or anyOf.
 enum AllOrAnyOf {
